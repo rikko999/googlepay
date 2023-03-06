@@ -9,11 +9,8 @@ module Googlepay
     end
 
     def create
-      p @parameters
-      p @origins
       rsa_private = OpenSSL::PKey::RSA.new Googlepay.configuration.service_account[:private_key]
       object = create_event_object(@parameters)
-      p object
       payload = {
           iss: Googlepay.configuration.service_account[:client_email],
           aud: 'google',
@@ -30,9 +27,9 @@ module Googlepay
   private
 
     def create_event_object(event_ticket)
-      result = HTTParty.post("#{EVENT_URL}access_token=#{Googlepay.token}",
-          :body => event_ticket.to_json,
-          :headers => { 'Content-Type' => 'application/json' } )
+      HTTParty.post("#{EVENT_URL}?access_token=#{Googlepay.token}",
+        :body => event_ticket.to_json,
+        :headers => { 'Content-Type' => 'application/json' } )
     end
   end
 
