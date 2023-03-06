@@ -11,7 +11,7 @@ module Googlepay
     def create
       rsa_private = OpenSSL::PKey::RSA.new Googlepay.configuration.service_account[:private_key]
       object = create_event_object(@parameters)
-      puts object
+      p object
       payload = {
           iss: Googlepay.configuration.service_account[:client_email],
           aud: 'google',
