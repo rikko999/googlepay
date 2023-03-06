@@ -1,24 +1,24 @@
 module Googlepay
   class EventTicketObject
 
-    EVENT_URL = 'https://www.googleapis.com/walletobjects/v1/eventTicketObject?'
+    EVENT_URL = 'https://walletobjects.googleapis.com/walletobjects/v1/eventTicketObject'.freeze
 
     def initialize(parameters)
       @parameters = parameters
     end
 
-    def create
+    def create(params, origins)
       rsa_private = OpenSSL::PKey::RSA.new Googlepay.configuration.service_account[:private_key]
-      create_event_object(@parameters)
+      object = create_event_object(params)
       payload = {
-          "iss": Googlepay.configuration.service_account[:client_email],
-          "aud": 'google',
-          "typ": 'savetoandroidpay',
-          "iat":  Time.now.utc.to_i,
-          "payload": {
-              'eventTicketObjects': [@parameters.dup.tap { |h| h.delete(:origin) }]
+          iss: Googlepay.configuration.service_account[:client_email],
+          aud: 'google',
+          typ: 'savetowallet',
+          iat:  Time.now.utc.to_i,
+          payload: {
+              eventTicketObjects: [{ id: object['id'] }]
           },
-          'origins': @parameters.fetch(:origin)
+          origins: origins
       }
       JWT.encode payload, rsa_private, 'RS256'
     end
@@ -30,6 +30,6 @@ module Googlepay
           :body => event_ticket.to_json,
           :headers => { 'Content-Type' => 'application/json' } )
     end
-  end  
+  end
 
 end
